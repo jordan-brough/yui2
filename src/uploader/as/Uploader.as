@@ -347,7 +347,6 @@
 	     */
 
 		public function uploadAll(url:String, method:String = "GET", vars:Object = null, fieldName:String = "Filedata", headers:Object = null):void {
-
 			if(isEmptyString(method)) {
 				method = "GET";
 			}
@@ -360,8 +359,14 @@
 			
 			filesToUpload = [];
 
-			for each(var fr:FileReference in fileRefList) {
-				queueForUpload(fr, request, fieldName);
+			// sort files in the order that they were given to us
+			var fileIds:Array = [];
+			for (var fileId:String in fileRefList) {
+			  fileIds.push(parseInt(fileId.substr(4)));
+			}
+			fileIds.sort(Array.NUMERIC);
+			for each(var fileId2:int in fileIds) {
+			  queueForUpload(fileRefList["file"+fileId2], request, fieldName);
 			}
 			
 			processQueue();
