@@ -471,7 +471,6 @@
 
 
 		private function uploadComplete (event:Event) : void {
-
 			logMessage("Upload complete for " + fileIDList[event.target]);
 			var newEvent:Object = new Object();
 			newEvent.id = fileIDList[event.target];
@@ -480,9 +479,7 @@
 
 			this.currentUploadThreads--;
 			// get next off of queue:
-			if(filesToUpload.length > 0) {
-				processQueue();
-			}
+			processQueue();
 		}
 
 
@@ -508,7 +505,6 @@
 
 
 		private function uploadError (event:Event) : void {
-
 	        var newEvent:Object = {};
 
 			if (event is HTTPStatusEvent) {
@@ -532,14 +528,8 @@
 
 			super.dispatchEventToJavaScript(newEvent);
 
-
-
 			// get next off of queue:
-
-			if(filesToUpload.length > 0) {
-				processQueue();
-			}
-
+			processQueue();
 		}
 
 
@@ -883,16 +873,15 @@
 		 */	
 
 		private function processQueue():void {
+			while (this.currentUploadThreads < this.simultaneousUploadLimit && filesToUpload.length > 0) {
+				var objToUpload:Object = filesToUpload.pop();
+				var fr:FileReference = objToUpload.fr;
+				var request:URLRequest = objToUpload.request;
+				var fieldName:String = objToUpload.fieldName;
 
-		while (this.currentUploadThreads < this.simultaneousUploadLimit) {
-			var objToUpload:Object = filesToUpload.pop();
-			var fr:FileReference = objToUpload.fr;
-			var request:URLRequest = objToUpload.request;
-			var fieldName:String = objToUpload.fieldName;
-
-			fr.upload(request,fieldName);
-			this.currentUploadThreads++;
-		}
+				fr.upload(request,fieldName);
+				this.currentUploadThreads++;
+			}
 		}
 
 		/**
