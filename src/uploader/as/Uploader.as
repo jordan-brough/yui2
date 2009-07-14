@@ -327,6 +327,34 @@
 			fr.upload(request,fieldName);
 		}
 
+		/**
+		 *  Uploads the specified files to a specified path where a script handles writing to the server.
+		 *  
+		 *  @param fileIDs The IDs of the files to be uploaded
+		 *  @param url The path to the serverside script
+		 *  @param method The HTTP submission method. Possible values are "GET" and "POST"
+		 *  @param vars An object containing data to be sent along with the request
+		 *  @param fieldName The field name that precedes the file data in the upload POST operation. The uploadDataFieldName value must be non-null and a non-empty String.
+		 */
+
+		public function uploadThese(fileIDs:Array, url:String, method:String = "GET", vars:Object = null, fieldName:String = "Filedata"):void {
+			if(isEmptyString(method)) {
+				method = "GET";
+			}
+
+			if(isEmptyString(fieldName)) {
+				fieldName = "Filedata";
+			}
+
+			var request:URLRequest = formURLRequest(url, method, vars);
+
+			for each(var fileID:String in fileIDs) {
+				queueForUpload(fileRefList[fileID], request, fieldName);
+			}
+
+			processQueue();
+		}
+
 	    /**
 	     *  Uploads all files to a specified path where a script handles writing to the server.
 		 *  
@@ -742,6 +770,8 @@
 			// upload(fileID:String, url:String, method:String = "GET", vars:Object = null, fieldName:String = "Filedata")
 			// Uploads the specified file in a specified POST variable, attaching other variables using the specified method
 			ExternalInterface.addCallback("upload", upload);
+			
+			ExternalInterface.addCallback("uploadThese", uploadThese);
 			
 			// uploadAll(url:String, method:String = "GET", vars:Object = null, fieldName:String = "Filedata")
 			// Uploads all files in the queue, using simultaneousUploads.
