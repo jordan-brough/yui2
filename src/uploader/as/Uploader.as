@@ -874,7 +874,7 @@
 
 		private function processQueue():void {
 			while (this.currentUploadThreads < this.simultaneousUploadLimit && filesToUpload.length > 0) {
-				var objToUpload:Object = filesToUpload.pop();
+				var objToUpload:Object = filesToUpload.shift();
 				var fr:FileReference = objToUpload.fr;
 				var request:URLRequest = objToUpload.request;
 				var fieldName:String = objToUpload.fieldName;
