@@ -402,4 +402,4 @@ YAHOO.widget.FlashAdapter.removeProxyFunction = function(funcName)
 	
 	funcName = funcName.substr(26);
 	YAHOO.widget.FlashAdapter[funcName] = null;
-};
+};;
