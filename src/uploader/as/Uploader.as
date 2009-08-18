@@ -561,6 +561,7 @@
 
 			super.dispatchEventToJavaScript(newEvent);
 
+			this.currentUploadThreads--;
 			// get next off of queue:
 			processQueue();
 		}
