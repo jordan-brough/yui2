@@ -26,7 +26,13 @@
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary; 
 
-
+  import mx.utils.Base64Encoder;
+  import flash.display.Bitmap;
+  import flash.display.BitmapData;
+  import flash.utils.ByteArray;
+  import flash.geom.ColorTransform;
+  import flash.geom.Matrix;
+	import com.adobe.images.JPGEncoder;
 
 	[SWF(backgroundColor=0xffffff)]
 
@@ -581,10 +587,33 @@
 		private function multipleFilesSelected(event:Event):void {
 			var currentFRL:FileReferenceList = multipleFiles;
 			for each (var currentFR:FileReference in currentFRL.fileList) {
-				addFile(currentFR);
+        currentFR.addEventListener(Event.COMPLETE, selectedLoaded);
+        currentFR.load();
+        /*addFile(currentFR);*/
 			}
-			processSelection();
+      /*processSelection();*/
 		}
+
+
+    private function selectedLoaded(e:Event):void {
+      var fileRef:FileReference = FileReference(e.target);
+      var imageLoader:Loader = new Loader();
+      imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event):void {
+        imageLoaded(e, fileRef);
+      });
+      imageLoader.loadBytes(fileRef.data);
+    }
+
+    private function imageLoaded(e:Event, fileRef:FileReference):void {
+      var bitmap:Bitmap = Bitmap(e.target.content);
+      var resizedBitmapData:BitmapData = new BitmapData(100, 100);
+      var scaleMatrix:Matrix = new Matrix( 100 / bitmap.width, 0, 0, 100 / bitmap.height, 0, 0);
+      var colorTransform:ColorTransform = new ColorTransform();
+      resizedBitmapData.draw(bitmap, scaleMatrix, colorTransform, null, null, true);
+      var byteArray:ByteArray = new JPGEncoder(90).encode(resizedBitmapData);
+      addFile(fileRef, byteArray);
+      processSelection();
+    }
 		
 		private function renderAsButton (buttonSkinSprite:String) : void {
 		
@@ -871,7 +900,7 @@
 		 *  Adds a file reference object to the internal queue and assigns listeners to its events
 		 */	
 
-		private function addFile(fr:FileReference):void {
+		private function addFile(fr:FileReference, byteArray:ByteArray=null):void {
 
 			var fileID:String = "file" + fileIDCounter;
 			var fileName:String = fr.name;
@@ -880,7 +909,10 @@
 			var fileSize:Number = fr.size;
 			fileIDCounter++;
 
-			fileDataList[fileID] = {id: fileID, name: fileName, cDate: fileCDate, mDate: fileMDate, size: fileSize};//, type: fileType, creator: fileCreator};
+			var encoder:Base64Encoder = new Base64Encoder();
+			encoder.encodeBytes(byteArray);
+
+			fileDataList[fileID] = {id: fileID, name: fileName, cDate: fileCDate, mDate: fileMDate, size: fileSize, data:encoder.toString()};//, type: fileType, creator: fileCreator};
 
 			fr.addEventListener(Event.OPEN, uploadStart);
             fr.addEventListener(ProgressEvent.PROGRESS, uploadProgress);
