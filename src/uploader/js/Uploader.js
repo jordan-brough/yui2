@@ -167,6 +167,14 @@ YAHOO.widget.Uploader = function(containerId, buttonSkin, forceTransparent)
 	 * @param event.status {String} The status message associated with the error.
 	 */	
 	this.createEvent("uploadError");
+
+	/**
+	 * Fires when all upload threads have finished and all files are uploaded
+	 *
+	 * @event queueComplete
+	 * @param event.type {String} The event type
+	 */	
+	this.createEvent("queueComplete");
 }
 
 /**

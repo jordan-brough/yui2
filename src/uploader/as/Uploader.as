@@ -443,6 +443,7 @@
 			uploadComplete - fires when a file upload is completed successfully and passes the corresponding file id.
 			uploadCompleteData - fires when data is received from the server after upload and passes the corresponding file id and the said data.
 			uploadError - fires when an error occurs during download. Passes the id of the file that was being uploaded and an error type.
+			queueComplete - fires when all upload threads have finished and all files are uploaded.
 		*/
 
 		private function transparentDown (event:MouseEvent) : void {
@@ -564,6 +565,15 @@
 			this.currentUploadThreads--;
 			// get next off of queue:
 			processQueue();
+		}
+
+
+		// called when all upload threads have finished and all files are uploaded
+		private function queueComplete () : void {
+			logMessage("Queue complete");
+			var newEvent:Object = new Object();
+			newEvent.type = "queueComplete"
+			super.dispatchEventToJavaScript(newEvent);
 		}
 
 
@@ -909,6 +919,11 @@
 		 */	
 
 		private function processQueue():void {
+			// if all upload threads have finished and all files are uploaded then dispatch queueComplete event
+			if (this.currentUploadThreads == 0 && filesToUpload.length == 0) {
+				queueComplete();
+				return;
+			}
 			while (this.currentUploadThreads < this.simultaneousUploadLimit && filesToUpload.length > 0) {
 				var objToUpload:Object = filesToUpload.shift();
 				var fr:FileReference = objToUpload.fr;
